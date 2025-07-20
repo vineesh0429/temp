@@ -1,0 +1,8 @@
+<device xmlns="urn:example:modem">
+  <ip-config>
+    <ip-model>static</ip-model>
+    <ip-address>10.0.0.42</ip-address>
+    <subnet-mask>255.255.255.0</subnet-mask>
+  </ip-config>
+</device>
+

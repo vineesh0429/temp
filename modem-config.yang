@@ -1,0 +1,28 @@
+module modem-config {
+  yang-version 1.1;
+  namespace "urn:example:modem";
+  prefix mc;
+
+  import ietf-yang-types { prefix yang; }  // for yang:mac-address
+  import ietf-inet-types { prefix inet; }  // for inet:ipv4-address-no-zone
+
+  container device {
+    container ip-config {
+      leaf ip-model    { type string; }
+      leaf ip-address  { type inet:ipv4-address-no-zone; }
+      leaf subnet-mask { type inet:ipv4-address-no-zone; }
+    }
+    container mac-config {
+      leaf mac-address { type yang:mac-address; }
+    }
+    container modulation {
+      leaf type { type string; }
+      container parameters {
+        leaf frequency   { type decimal64 { fraction-digits 4; } }
+        leaf symbol-rate { type decimal64 { fraction-digits 4; } }
+        leaf bandwidth   { type decimal64 { fraction-digits 4; } }
+      }
+    }
+  }
+}
+
