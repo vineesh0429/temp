@@ -1,0 +1,44 @@
+module example-interfaces {
+  yang-version 1.1;
+  namespace "urn:example:interfaces";
+  prefix exif;
+
+  import iana-if-type {
+    prefix iana;
+  }
+
+  container interfaces {
+    description
+      "List of network interfaces (mirrors JSON 'ietf-interfaces:interface').";
+
+    list interface {
+      key "name";
+      description "A single interface entry.";
+
+      leaf name {
+        type string;
+        description "Interface name (e.g., eth0)";
+      }
+
+      leaf type {
+        type identityref {
+          base iana:if-interface;
+        }
+        description
+          "Interface type (e.g., ethernetCsmacd)";
+      }
+
+      leaf enabled {
+        type boolean;
+        default false;
+        description "Administrative state";
+      }
+
+      leaf description {
+        type string;
+        description "User‑provided description";
+      }
+    }
+  }
+}
+
