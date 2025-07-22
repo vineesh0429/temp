@@ -1,0 +1,46 @@
+module example-interfaces {
+  yang-version 1.1;
+  namespace "urn:example:interfaces";
+  prefix exif;
+
+  // 1) import the IETF interfaces model (defines interface-type)
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  // 2) import the IANA mapping of interface types
+  import iana-if-type {
+    prefix ianaift;
+  }
+
+  container interfaces {
+    list interface {
+      key "name";
+
+      leaf name {
+        type string;
+        description "The interface name (e.g., eth0)";
+      }
+
+      leaf type {
+        /* Allow any identity under if:interface-type,
+           e.g. ianaift:ethernetCsmacd */
+        type identityref {
+          base if:interface-type;
+        }
+        description "The type of the interface";
+      }
+
+      leaf enabled {
+        type boolean;
+        default true;
+        description "Administrative state";
+      }
+
+      leaf description {
+        type string;
+        description "User‑provided description";
+      }
+    }
+  }
+}
