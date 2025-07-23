@@ -1,0 +1,50 @@
+#include <sysrepo-cpp/Session.hpp>
+#include <iostream>
+
+static void on_module_change(sysrepo::Session session, const char *module_name, sr_notif_event_t event,
+                             void *private_ctx)
+{
+    std::cout << "Change detected in module: " << module_name << ", event: " << event << std::endl;
+
+    auto changes = session.get_changes("/example:config/param1");
+
+    for (const auto &change : changes) {
+        auto oper = change.operation();
+        std::cout << "Operation: " << oper << std::endl;
+
+        if (oper == sr_change_oper_t::SR_OP_CREATED) {
+            std::cout << "Created: " << change.new_value().to_string() << std::endl;
+        } else if (oper == sr_change_oper_t::SR_OP_MODIFIED) {
+            std::cout << "Modified from: " << change.old_value().to_string()
+                      << " to: " << change.new_value().to_string() << std::endl;
+        } else if (oper == sr_change_oper_t::SR_OP_DELETED) {
+            std::cout << "Deleted: " << change.old_value().to_string() << std::endl;
+        }
+    }
+}
+
+int main()
+{
+    try {
+        // Connect to sysrepo
+        auto conn = std::make_shared<sysrepo::Connection>();
+        sysrepo::Session session(conn);
+
+        // Subscribe to changes on the given path
+        sysrepo::Subscribe subscribe(session);
+        subscribe.module_change_subscribe("example", on_module_change, nullptr, 0, sysrepo::SubscribeOptions::DEFAULT);
+
+        std::cout << "Listening for changes... Press Ctrl+C to exit." << std::endl;
+
+        // Block forever (or until SIGINT)
+        while (true) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+
+    } catch (const std::exception &e) {
+        std::cerr << "Error occurred: " << e.what() << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
