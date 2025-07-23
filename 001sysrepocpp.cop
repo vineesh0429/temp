@@ -1,0 +1,44 @@
+#include <sysrepo-cpp/Session.hpp>
+#include <iostream>
+#include <chrono>
+#include <thread>
+
+int main() {
+    try {
+        sysrepo::Connection conn;
+        auto sess = conn.sessionStart();
+
+        // Subscribe to changes in "example" module
+        auto sub = sess.onModuleChange(
+            "example",  // your YANG module name
+            [](sysrepo::Session session,
+               uint32_t,  // subscription_id
+               sysrepo::ModuleChangeType change_type,
+               sysrepo::Event event,
+               const std::optional<std::string> &xpath) {
+                
+                std::cout << "[Callback] Event: " << static_cast<int>(event)
+                          << ", ChangeType: " << static_cast<int>(change_type);
+                if (xpath)
+                    std::cout << ", XPath: " << *xpath;
+                std::cout << std::endl;
+
+                if (event == sysrepo::Event::Change) {
+                    for (const auto &change : session.getChanges()) {
+                        std::cout << "  Change: " << change.asString() << std::endl;
+                    }
+                }
+
+                return sysrepo::ErrorCode::Ok;
+            }
+        );
+
+        std::cout << "Listening for changes to module 'example'...\n";
+        while (true) std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
+}
+
